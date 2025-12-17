@@ -1,0 +1,755 @@
+# Ming-UniAudio
+
+<p align="center">
+    <img src="./figures/ant-bailing.png" width="100"/>
+<p>
+
+<p align="center">📝<a href="https://arxiv.org/abs/2511.05516">Technical Report</a> ｜🌐<a href="https://xqacmer.github.io/Ming-Unitok-Audio.github.io/">Project Page</a> ｜🤗 <a href="https://huggingface.co/inclusionAI/Ming-UniAudio-16B-A3B">Hugging Face</a>｜ 🤖 <a href="https://modelscope.cn/models/inclusionAI/Ming-UniAudio-16B-A3B">ModelScope</a>
+
+## Table of Contents
+- [Introduction](#introduction)
+- [Updates](#updates)
+- [Key Features](#key-features)
+- [Evaluation](#evaluation)
+  - [Speech Tokenizer](#speech-tokenizer)
+  - [Speech Understanding](#speech-understanding)
+  - [Speech Generation](#speech-generation)
+  - [Speech Editing](#speech-editing)
+- [Model & Benchmark Downloads](#model--benchmark-downloads)
+- [Environment Preparation](#environment-preparation)
+- [Example Usage](#example-usage)
+- [SFT](#sft)
+- [Citation](#citation)
+- [Join Us](#join-us)
+
+## Introduction
+
+Ming-UniAudio is a novel framework that unifies speech understanding, generation, and editing. Its core is a unified continuous speech tokenizer that effectively unifies semantic and acoustic features within an end-to-end model. We developed a speech language model that strikes a balance between generation and understanding capabilities based on the unified continuous audio tokenizer. Leveraging this foundational model, which exhibits robust performance in both domains, we further trained a dedicated speech editing model built upon [Ming-Lite-Omni](https://github.com/inclusionAI/Ming). Crucially, Ming-UniAudio is the first to enable universal, free-form speech editing guided solely by natural language instructions, handling complex semantic and acoustic modifications without manual region specification.
+
+- 🔥 First unified continuous speech tokenizer for both understanding and generation tasks: [MingTok-Audio](https://github.com/inclusionAI/MingTok-Audio)
+- 🔥 First Speech LLM  with unifed continuous tokenizer for both understanding and generation: [Ming-UniAudio](https://huggingface.co/inclusionAI/Ming-UniAudio-16B-A3B)
+- 🔥 First universal free-form speech editing model for various semantic and acoustic editing task without any timestamp condition: [Ming-UniAudio-Edit](https://huggingface.co/inclusionAI/Ming-UniAudio-16B-A3B-Edit)
+- 🔥 First benchmark for free-form speech editing: [Ming-Freeform-Audio-Edit-Benchmark](https://huggingface.co/datasets/inclusionAI/Ming-Freeform-Audio-Edit-Benchmark)
+
+<p align="center">
+    <img src="./figures/uniaudio.png" width="600"/>
+<p>
+
+## Updates
+
+- [ ] Support VLLM Inference
+- [x] [Technical Report](https://arxiv.org/abs/2511.05516)
+- [x] [ASR & TTS SFT recipes](sft/README.md)
+- [x] Streaming TTS
+- [x] [Ming-UniAudio Blog](https://xqacmer.github.io/Ming-Unitok-Audio.github.io)
+
+## Key Features
+Ming-UniAudio features key optimizations as follows, compared to other audio-assisted LLMs:
+- **Unified Continuous Speech Tokenizer**: Ming-UniAudio proposes a unified continuous speech tokenizer [MingTok-Audio](https://github.com/inclusionAI/MingTok-Audio) based on a VAE framework with a causal Transformer architecture, the first continuous speech tokenizer to effectively integrate semantic and acoustic features, and enables a closed-loop system with LLMs through hierarchical feature representations, makes it suitable for both understanding and generation tasks
+<p align="center">
+    <img src="./figures/uniaudio-tokenizer.png" width="600"/>
+<p>
+
+- **Unified Speech Language Model for Generation and Understanding**: We pretrain an end-to-end unified speech language model with a single LLM backbone for both understanding and generation tasks, enhanced with a Diffusion Head to ensure high-quality speech synthesis.
+- **Instruction-Guided Free-Form Speech Editing**: We introduce the first instruction-guided, free-form speech editing framework that supports comprehensive semantic and acoustic edits without requiring explicit edit regions, along with [Ming-Freeform-Audio-Edit](https://github.com/inclusionAI/Ming-Freeform-Audio-Edit), the first open-source evaluation set for such tasks.
+
+
+<!-- <p align="center">
+    <img src="./figures/uniaudio-tokenizer.pdf" width="600"/>
+<p> -->
+
+##  Evaluation
+In various benchmark tests, Ming-UniAudio demonstrates highly competitive results compared to industry-leading models of similar scale.
+
+
+### Speech Tokenizer
+<table>
+<caption>Comparison of reconstruction performance across different acoustic tokenizers. The best results are in  <strong>bold</strong>.</caption>
+  <thead>
+    <tr>
+      <th rowspan="2" align="left"><b>System</b></th>
+      <th rowspan="2" align="center"><b>FrameRate</b></th>
+      <th colspan="3" align="center"><b>SEED-ZH</b></th>
+      <th colspan="3" align="center"><b>SEED-EN</b></th>
+    </tr>
+    <tr>
+      <th align="center"><b>PESQ↑</b></th>
+      <th align="center"><b>SIM↑</b></th>
+      <th align="center"><b>STOI↑</b></th>
+      <th align="center"><b>PESQ↑</b></th>
+      <th align="center"><b>SIM↑</b></th>
+      <th align="center"><b>STOI↑</b></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">MiMo-Audio-Tokenizer</td>
+      <td align="center">25</td>
+      <td align="center">2.71</td>
+      <td align="center">0.89</td>
+      <td align="center">0.93</td>
+      <td align="center">2.43</td>
+      <td align="center">0.85</td>
+      <td align="center">0.92</td>
+    </tr>
+    <tr>
+      <td align="left">GLM4-Voice-Tokenizer</td>
+      <td align="center">12.5</td>
+      <td align="center">1.06</td>
+      <td align="center">0.33</td>
+      <td align="center">0.61</td>
+      <td align="center">1.05</td>
+      <td align="center">0.12</td>
+      <td align="center">0.60</td>
+    </tr>
+    <tr>
+      <td align="left">Baichuan-Audio-Tokenizer</td>
+      <td align="center">12.5</td>
+      <td align="center">1.84</td>
+      <td align="center">0.78</td>
+      <td align="center">0.86</td>
+      <td align="center">1.62</td>
+      <td align="center">0.69</td>
+      <td align="center">0.85</td>
+    </tr>
+    <tr>
+      <td align="left">XY-Tokenizer</td>
+      <td align="center">12.5</td>
+      <td align="center">2.27</td>
+      <td align="center">0.77</td>
+      <td align="center">0.90</td>
+      <td align="center">2.14</td>
+      <td align="center">0.82</td>
+      <td align="center">0.90</td>
+    </tr>
+    <tr>
+      <td align="left">Mimi</td>
+      <td align="center">75</td>
+      <td align="center">2.05</td>
+      <td align="center">0.73</td>
+      <td align="center">0.89</td>
+      <td align="center">2.01</td>
+      <td align="center">0.77</td>
+      <td align="center">0.89</td>
+    </tr>
+    <tr>
+      <td align="left">XCodec2.0</td>
+      <td align="center">50</td>
+      <td align="center">2.19</td>
+      <td align="center">0.80</td>
+      <td align="center">0.92</td>
+      <td align="center">2.37</td>
+      <td align="center">0.82</td>
+      <td align="center">0.93</td>
+    </tr>
+    <tr>
+      <td align="left">BigCodec</td>
+      <td align="center">80</td>
+      <td align="center">2.26</td>
+      <td align="center">0.81</td>
+      <td align="center">0.92</td>
+      <td align="center">2.22</td>
+      <td align="center">0.80</td>
+      <td align="center">0.91</td>
+    </tr>
+    <tr>
+      <td align="left"><strong>MingTok-Audio(ours)</strong></td>
+      <td align="center">50</td>
+      <td align="center"><b>4.21</b></td>
+      <td align="center"><b>0.96</b></td>
+      <td align="center"><b>0.98</b></td>
+      <td align="center"><b>4.04</b></td>
+      <td align="center"><b>0.96</b></td>
+      <td align="center"><b>0.98</b></td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+### Speech Understanding
+
+<table>
+  <caption>ASR performance comparison on various audio benchmark datasets. The best results are in <strong>bold</strong>.</caption>
+  <thead>
+    <tr>
+      <th rowspan="2"><strong>Datasets</strong></th>
+      <th rowspan="2"><strong>Model</strong></th>
+      <th colspan="7"><strong>Performance</strong></th>
+    </tr>
+    <tr>
+      <th><strong>aishell2-ios</strong></th>
+      <th><strong>LS-clean</strong></th>
+      <th><strong>Hunan</strong></th>
+      <th><strong>Minnan</strong></th>
+      <th><strong>Guangyue</strong></th>
+      <th><strong>Chuanyu</strong></th>
+      <th><strong>Shanghai</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="4"><strong>Understanding ASR</strong></td>
+      <td>Kimi-Audio</td>
+      <td><strong>2.56</strong></td>
+      <td><strong>1.28</strong></td>
+      <td>31.93</td>
+      <td>80.28</td>
+      <td>41.49</td>
+      <td>6.69</td>
+      <td>60.64</td>
+    </tr>
+    <tr>
+      <td>Qwen2.5 Omni</td>
+      <td>2.75</td>
+      <td>1.80</td>
+      <td>29.31</td>
+      <td>53.43</td>
+      <td>10.39</td>
+      <td>7.61</td>
+      <td>32.05</td>
+    </tr>
+    <tr>
+      <td>Qwen2 Audio</td>
+      <td>2.92</td>
+      <td>1.60</td>
+      <td>25.88</td>
+      <td>123.78</td>
+      <td>7.59</td>
+      <td>7.77</td>
+      <td>31.73</td>
+    </tr>
+    <tr>
+      <td><strong>Ming-UniAudio-16B-A3B(ours)</strong></td>
+      <td>2.84</td>
+      <td>1.62</td>
+      <td><strong>9.80</strong></td>
+      <td><strong>16.50</strong></td>
+      <td><strong>5.51</strong></td>
+      <td><strong>5.46</strong></td>
+      <td><strong>14.65</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table>
+  <caption>Context ASR performance comparison on various audio benchmark datasets.</caption>
+  <thead>
+    <tr>
+      <th rowspan="2"><strong>Datasets</strong></th>
+      <th rowspan="2"><strong>Model</strong></th>
+      <th colspan="4"><strong>Performance</strong></th>
+    </tr>
+    <tr>
+      <th>
+        <strong>Speech-English</strong><br>
+        <small><strong>WER | NE-WER | NE-FNR</strong></small>
+      </th>
+      <th>
+        <strong>Dialogue-English</strong><br>
+        <small><strong>WER | NE-WER | NE-FNR</strong></small>
+      </th>
+      <th>
+        <strong>Speech-Mandarin</strong><br>
+        <small><strong>WER | NE-WER | NE-FNR</strong></small>
+      </th>
+      <th>
+        <strong>Dialogue-Mandarin</strong><br>
+        <small><strong>WER | NE-WER | NE-FNR</strong></small>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="7">
+        <strong>Understanding</strong> <br> 
+        <strong>Context ASR</strong><br>
+      </td>
+      <td>Qwen2-Audio</td>
+      <td>11.49 | 27.27 | 35.08</td>
+      <td>13.99 | 33.02 | 32.92</td>
+      <td>9.92 | 24.10 | 30.02</td>
+      <td>7.00 | 22.76 | 26.17</td>
+    </tr>
+    <tr>
+      <td>Baichuan-Audio</td>
+      <td>7.52 | 5.87 | 4.55</td>
+      <td>5.66 | 10.01 | 3.64</td>
+      <td>2.16 | 6.65 | <strong>2.35</strong></td>
+      <td>2.96 | 11.48 | 3.94</td>
+    </tr>
+    <tr>
+      <td>Kimi-Audio</td>
+      <td><strong>2.90</strong> | 6.68 | 8.01</td>
+      <td><strong>4.67</strong> | 13.50 | 11.31</td>
+      <td>1.95 | 11.13 | 15.28</td>
+      <td>2.90 | 15.91 | 16.68</td>
+    </tr>
+    <tr>
+      <td>Baichuan-Omni-1.5</td>
+      <td>8.16 | 7.69 | 6.53</td>
+      <td>9.91 | 14.40 | 5.54</td>
+      <td>2.98 | 8.39 | 4.71</td>
+      <td>5.00 | 16.83 | 7.84</td>
+    </tr>
+    <tr>
+      <td>Qwen2.5-Omni-3B</td>
+      <td>3.99 | 7.80 | 9.69</td>
+      <td>4.83 | 14.36 | 12.85</td>
+      <td>2.13 | 10.55 | 14.11</td>
+      <td>3.12 | 15.07 | 15.17</td>
+    </tr>
+    <tr>
+      <td>Qwen2.5-Omni-7B</td>
+      <td>3.96 | 7.38 | 8.72</td>
+      <td>5.32 | 11.83 | 9.24</td>
+      <td>1.84 | 9.80 | 12.19</td>
+      <td><strong>2.40</strong> | 14.06 | 13.17</td>
+    </tr>
+    <tr>
+      <td><strong>Ming-UniAudio-16B-A3B-Edit(ours)</strong></td>
+      <td>4.00 | <strong>3.56</strong> | <strong>3.69</strong></td>
+      <td>5.34 | <strong>8.73</strong> | <strong>2.53</strong></td>
+      <td><strong>1.58</strong> | <strong>5.98</strong> | 2.40</td>
+      <td>3.04 | <strong>9.50</strong> | <strong>1.48</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+### Speech Generation
+
+<table align="center">
+<caption>Performance comparison on various audio benchmark datasets. The best results are in  <strong>bold</strong>.</caption>
+  <thead>
+    <tr>
+      <th align="left"><b>Datasets</b></th>
+      <th align="left"><b>Model</b></th>
+      <th colspan="4" align="center"><b>Performance</b></th>
+    </tr>
+    <tr>
+      <th></th>
+      <th></th>
+      <th align="center"><b>Seed-zh WER(%)</b></th>
+      <th align="center"><b>Seed-zh SIM</b></th>
+      <th align="center"><b>Seed-en WER(%)</b></th>
+      <th align="center"><b>Seed-en SIM</b></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="5" align="left" style="vertical-align: middle;"><b>Generation</b></td>
+      <td align="left">Seed-TTS</td>
+      <td align="center">1.12</td>
+      <td align="center"><b>0.80</b></td>
+      <td align="center">2.25</td>
+      <td align="center"><b>0.76</b></td>
+    </tr>
+    <tr>
+      <td align="left">MiMo-Audio</td>
+      <td align="center">1.96</td>
+      <td align="center">-</td>
+      <td align="center">5.37</td>
+      <td align="center">-</td>
+    </tr>
+    <tr>
+      <td align="left">Qwen3-Omni-30B-A3B-Instruct</td>
+      <td align="center">1.07</td>
+      <td align="center">-</td>
+      <td align="center"><b>1.39</b></td>
+      <td align="center">-</td>
+    </tr>
+    <tr>
+      <td align="left">Ming-Omni-Lite</td>
+      <td align="center">1.69</td>
+      <td align="center">0.68</td>
+      <td align="center">4.31</td>
+      <td align="center">0.51</td>
+    </tr>
+    <tr>
+      <td align="left"><strong>Ming-UniAudio-16B-A3B(ours)</strong></td>
+      <td align="center"><b>0.95</b></td>
+      <td align="center">0.70</td>
+      <td align="center">1.85</td>
+      <td align="center">0.58</td>
+    </tr>
+  </tbody>
+</table>
+
+
+### Speech Editing
+
+<table>
+<caption>Performance on various audio benchmark datasets.</caption>
+  <thead>
+    <tr>
+      <th rowspan="2"><strong>Datasets</strong></th>
+      <th rowspan="2"><strong>Model</strong></th>
+      <th colspan="4"><strong>Performance</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>
+        <strong>Deletion-basic<br>
+        <strong>Deletion</strong>
+      </th>
+      <td>Ming-UniAudio-16B-A3B-Edit</td>
+      <td align="center">
+        <strong>WER(%) zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        11.89 | 14.85<br>
+        22.92 | 27.60
+      </td>
+      <td align="center">
+        <strong>ACC zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        100 | 82.22<br>
+        82.92 | 85
+      </td>
+      <td align="center">
+        <strong>SIM zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        0.78 | 0.76<br>
+        0.81 | 0.74
+      </td>
+      <td align="center">
+        <strong>no-edit WER(%) zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        11.49 | 24.26<br>
+        17.50 | 35.21
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <strong>Insertion-basic<br>
+        <strong>Insertion</strong>
+      </th>
+      <td>Ming-UniAudio-16B-A3B-Edit</td>
+      <td align="center">
+        <strong>WER(%) zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        3.42 | 6.63<br>
+        3.89 | 7.592
+      </td>
+      <td align="center">
+        <strong>ACC zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        80 | 71.43<br>
+        79.31 | 62.31
+      </td>
+      <td align="center">
+        <strong>SIM zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        0.83 | 0.79<br>
+        0.83 | 0.79 
+      </td>
+      <td align="center">
+        <strong>no-edit WER(%) zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        3.52 | 17.70<br>
+        4.10 | 18.84
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <strong>Substitution-basic<br>
+        <strong>Substitution</strong>
+      </th>
+      <td>Ming-UniAudio-16B-A3B-Edit</td>
+      <td align="center">
+      <strong>WER(%) zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        4.52 | 8.99<br>
+        4.56 | 7.64
+      </td>
+      <td align="center">
+      <strong>ACC zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        78.62 | 59.78<br>
+        76.62 | 65.62
+      </td>
+      <td align="center">
+      <strong>SIM zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        0.82 | 0.78<br>
+        0.83 | 0.77
+      </td>
+      <td align="center">
+      <strong>no-edit WER(%) zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        4.63 | 19.28<br>
+        4.75 | 18.39
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <strong>Dialect Conversion<br>
+      </th>
+      <td>Ming-UniAudio-16B-A3B-Edit</td>
+      <td align="center">
+      <strong>WER(%)</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        8.93
+      </td>
+      <td align="center">
+      <strong>ACC</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        0.50
+      </td>
+      <td align="center">
+      <strong>SIM</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        0.66
+      </td>
+      <td align="center">
+      -
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <strong>Speed changing<br>
+      </th>
+      <td>Ming-UniAudio-16B-A3B-Edit</td>
+      <td align="center">
+      <strong>WER(%) zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        5.88 | 17.53
+      </td>
+      <td align="center">
+      <strong>SIM zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        0.66 | 0.57
+      </td>
+      <td align="center">
+      <strong>RDE(%) zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        6.36 | 5.92
+      </td>
+      <td align="center">
+      -
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <strong>Pitch changing<br>
+      </th>
+      <td>Ming-UniAudio-16B-A3B-Edit</td>
+      <td align="center">
+      <strong>WER(%) zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        7.45 | 13.37
+      </td>
+      <td align="center">
+      <strong>SIM zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        0.36 | 0.24
+      </td>
+      <td align="center">
+      -
+      </td>
+      <td align="center">
+      -
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <strong>Volume changing<br>
+      </th>
+      <td>Ming-UniAudio-16B-A3B-Edit</td>
+      <td align="center">
+      <strong>WER(%) zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        1.71 | 1.35
+      </td>
+      <td align="center">
+      <strong>SIM zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        0.86 | 0.80
+      </td>
+      <td align="center">
+      <strong>RAE(%) zh | en</strong><br>
+        <hr style="height: 1px; background-color: black; border: none; margin: 2px 0;">
+        14.9 | 11.7
+      </td>
+      <td align="center">
+      -
+      </td>
+    </tr>
+    
+  </tbody>
+</table>
+
+<!-- Denoise Group -->
+<h4>Denoise</h4>
+<table>
+<caption>Performance comparison on various audio benchmark datasets. The best results are in  <strong>bold</strong>.</caption>
+  <thead>
+    <tr>
+      <th><strong>Datasets</strong></th>
+      <th><strong>Model</strong></th>
+      <th><strong>Model Type</strong></th>
+      <th><strong>DNSMOS OVRL</strong></th>
+      <th><strong>DNSMOS SIG</strong></th>
+      <th><strong>DNSMOS BAK</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="8"><strong>Denoise</strong></td>
+      <td>FullSubNet</td>
+      <td rowspan="6">specialized</td>
+      <td>2.93</td>
+      <td>3.05</td>
+      <td>3.51</td>
+    </tr>
+    <tr>
+      <td>Inter-Subnet</td>
+      <td>2.98</td>
+      <td>3.17</td>
+      <td>3.15</td>
+    </tr>
+    <tr>
+      <td>CDiffuSE</td>
+      <td>2.84</td>
+      <td>3.37</td>
+      <td>3.52</td>
+    </tr>
+    <tr>
+      <td>SGMSE</td>
+      <td>3.11</td>
+      <td>3.47</td>
+      <td>3.41</td>
+    </tr>
+    <tr>
+      <td>StoRM</td>
+      <td>3.15</td>
+      <td>3.54</td>
+      <td>3.69</td>
+    </tr>
+    <tr>
+      <td>GenSE</td>
+      <td><strong>3.43</strong></td>
+      <td><strong>3.65</strong></td>
+      <td><strong>4.18</strong></td>
+    </tr>
+    <tr>
+      <td>MiMo-Audio</td>
+      <td rowspan="2">general</td>
+      <td>3.30</td>
+      <td>3.56</td>
+      <td>4.10</td>
+    </tr>
+    <tr>
+      <td><strong>Ming-UniAudio-16B-A3B-Edit(ours)</strong></td>
+      <td>3.26</td>
+      <td>3.59</td>
+      <td>3.97</td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+## Model & Benchmark Downloads
+
+You can download our latest model and Benchmark from both Huggingface and ModelScope.
+
+<div align="center">
+
+|**Type**| **Model**              |   **Input modality**   | **Oput modality** |                                                                         **Download**                                                                         |
+|:-----------------------|:-----------------------|:----------------------:| :---------------: |:------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+Tokenizer| MingTok-Audio | audio | audio  | [🤗 HuggingFace](https://huggingface.co/inclusionAI/MingTok-Audio) <br>[🤖 ModelScope](https://modelscope.cn/models/inclusionAI/MingTok-Audio) |
+SpeechLLM| Ming-UniAudio-16B-A3B     | audio | audio  | [🤗 HuggingFace](https://huggingface.co/inclusionAI/Ming-UniAudio-16B-A3B) <br>[🤖 ModelScope](https://modelscope.cn/models/inclusionAI/Ming-UniAudio-16B-A3B) |
+SpeechLLM| Ming-UniAudio-16B-A3B-Edit     | text, audio | text, audio  | [🤗 HuggingFace](https://huggingface.co/inclusionAI/Ming-UniAudio-16B-A3B-Edit) <br>[🤖 ModelScope](https://modelscope.cn/models/inclusionAI/Ming-UniAudio-16B-A3B-Edit) |
+Benchmark| Ming-Freeform-Audio-Edit     | - | -  | [🤗 HuggingFace](https://huggingface.co/datasets/inclusionAI/Ming-Freeform-Audio-Edit-Benchmark) <br>[🤖 ModelScope](https://modelscope.cn/datasets/inclusionAI/Ming-Freeform-Audio-Edit-Benchmark) <br>[Eval tools](https://github.com/inclusionAI/Ming-Freeform-Audio-Edit)|
+</div>
+If you're in mainland China, we strongly recommend you to download our model from 🤖 <a href="https://modelscope.cn/models/inclusionAI/Ming-UniAudio-16B-A3B">ModelScope</a>.
+
+```
+pip install modelscope
+modelscope download --model inclusionAI/Ming-UniAudio-16B-A3B --local_dir inclusionAI/Ming-UniAudio-16B-A3B  --revision master
+```
+
+Note: This download process will take several minutes to several hours, depending on your network conditions.
+
+
+## Environment Preparation
+
+
+### Installation with pip
+```shell
+pip install -r requirements.txt
+```
+
+### Installation with docker
+
+You can set up the environment using Docker in two ways.
+- Option 1: Pull from Docker Hub (**Recommended**)
+```bash
+# 1. Pull the pre-built image
+docker pull yongjielv/ming_uniaudio:v1.1
+
+# 2. Run the container
+docker run -it --gpus all yongjielv/ming_uniaudio:v1.1 /bin/bash
+```
+- Option 2: Build from Source
+``` bash
+# 1. Build the image
+docker build -t ming-uniaudio:v1.1 -f ./docker/ming_uniaudio.dockerfile .
+
+# 2. Run the container
+docker run -it --gpus all ming-uniaudio:v1.1 /bin/bash
+```
+
+
+## Example Usage
+
+We provide a step-by-step running example:
+
+Step 1 - Download the source code
+```
+git clone	https://github.com/inclusionAI/Ming-UniAudio
+cd Ming-UniAudio
+```
+Step 2 - Download the Ming-UniAudio model weights and create a soft link to the source code directory
+
+Download our model following `Model & Benchmark Downloads`
+
+```shell
+mkdir inclusionAI 
+ln -s /path/to/inclusionAI/Ming-UniAudio-16B-A3B inclusionAI/Ming-UniAudio-16B-A3B
+```
+
+Step 3 - Enter the code directory, you can refer to the following codes to run the Ming-UniAudio model.
+```shell
+python3 cookbooks/test.py
+```
+
+For detailed usage, please refer to [demo.ipynb](cookbooks/demo.ipynb).
+
+Note: We test the examples on hardware of NVIDIA H800-80GB/H20-96G with CUDA 12.4.
+
+## SFT
+We have open-sourced the Supervised Fine-Tuning (SFT) part for speech generation, which supports both full-parameter and LoRA training. Please follow the [recipes](sft/README.md) to start training.
+
+
+## Citation
+
+If you find our work helpful, feel free to give us a cite.
+```
+@misc{yan2025minguniaudiospeechllmjoint,
+      title={Ming-UniAudio: Speech LLM for Joint Understanding, Generation and Editing with Unified Representation}, 
+      author={Canxiang Yan and Chunxiang Jin and Dawei Huang and Haibing Yu and Han Peng and Hui Zhan and Jie Gao and Jing Peng and Jingdong Chen and Jun Zhou and Kaimeng Ren and Ming Yang and Mingxue Yang and Qiang Xu and Qin Zhao and Ruijie Xiong and Shaoxiong Lin and Xuezhi Wang and Yi Yuan and Yifei Wu and Yongjie Lyu and Zhengyu He and Zhihao Qiu and Zhiqiang Fang and Ziyuan Huang},
+      year={2025},
+      eprint={2511.05516},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2511.05516}, 
+}
+```
+
+## Join Us
+The Ant Group's Bailing (百灵) large language model team is seeking talented speech algorithm engineers for R&D in areas including **Speech Understanding, Generation, Dialogue, and Tokenizers**. If you're passionate about building state-of-the-art speech technology, send your resume to [lyuyongjie.lyj@antgroup.com](mailto:lyuyongjie.lyj@antgroup.com).
